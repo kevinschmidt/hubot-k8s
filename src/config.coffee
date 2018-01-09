@@ -38,7 +38,6 @@ class Config
     'services': (response, dashboardPrefix) ->
       reply = ''
       for service in response.items
-        console.log(service)
         {metadata: {name, namespace}, spec: {clusterIP, ports}} = service
         internalPorts = []
         nodePorts = []
