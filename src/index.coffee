@@ -41,7 +41,7 @@ module.exports = (@robot) ->
       reply = "\n"
       responseFormat = Config.responses[resource] or ->
       reply = "Here is the list of *#{resource}* running in namespace *#{namespace}* with context *#{context}*\n"
-      reply += responseFormat response
+      reply += responseFormat(response, contextConfig.dashboardPrefix)
       res.reply reply
 
   robot.respond /k8s\s*(logs|log)\s*(.+)?/i, (res) ->

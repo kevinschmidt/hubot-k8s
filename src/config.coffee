@@ -1,5 +1,5 @@
 # Configuration:
-#   HUBOT_K8S_CONTEXTS - map for kubernetes contexts (like kubectl), example: {"default":{"server":"https://kubernetes.example.org:6443","ca":"/kube-ca.crt","token":"kube-token"}}
+#   HUBOT_K8S_CONTEXTS - map for kubernetes contexts (like kubectl), example: {"default":{"server":"https://kubernetes.example.org:6443","ca":"/kube-ca.crt","token":"kube-token","dashboardPrefix":"https://kubernetes.example.org"}}
 #   HUBOT_K8S_DEFAULT_CONTEXT - default context to use
 #   HUBOT_K8S_DEFAULT_NAMESPACE - default namespace to use
 
@@ -35,7 +35,7 @@ class Config
     return robot.brain.set(key, namespace or @defaultNamespace)
 
   @responses =
-    'services': (response) ->
+    'services': (response, dashboardPrefix) ->
       reply = ''
       for service in response.items
         console.log(service)
@@ -46,14 +46,14 @@ class Config
           {protocol, port, nodePort} = p
           internalPorts.push "#{port}/#{protocol}"
           nodePorts.push "#{nodePort}/#{protocol}"
-        reply += ">*<https://kubernetes.int.ctek.io/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/service/#{namespace}/#{name}?namespace=#{namespace}|#{name}>*\n"
+        reply += ">*<#{dashboardPrefix}/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/service/#{namespace}/#{name}?namespace=#{namespace}|#{name}>*\n"
         reply += ">ports `#{internalPorts.join(" ")}` and node ports `#{nodePorts.join(" ")}` with cluster ip: `#{clusterIP}`\n\n"
       return reply
-    'pods': (response) ->
+    'pods': (response, dashboardPrefix) ->
       reply = ''
       for pod in response.items
         {metadata: {name, namespace}, status: {phase, startTime, containerStatuses}} = pod
-        reply += ">*<https://kubernetes.int.ctek.io/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/pod/#{namespace}/#{name}?namespace=#{namespace}|#{name}>*\n"
+        reply += ">*<#{dashboardPrefix}/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/pod/#{namespace}/#{name}?namespace=#{namespace}|#{name}>*\n"
         reply += ">status `#{phase}` since `#{moment(startTime).fromNow()}`\n"
         for cs in containerStatuses
           {name, restartCount, image} = cs
