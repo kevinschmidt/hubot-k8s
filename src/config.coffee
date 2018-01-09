@@ -38,24 +38,27 @@ class Config
     'services': (response) ->
       reply = ''
       for service in response.items
-        {metadata: {creationTimestamp}, spec: {clusterIP, ports}} = service
-        internalPorts = ""
-        nodePorts = ""
+        console.log(service)
+        {metadata: {name, namespace}, spec: {clusterIP, ports}} = service
+        internalPorts = []
+        nodePorts = []
         for p in ports
           {protocol, port, nodePort} = p
-          internalPorts += "#{port}/#{protocol} "
-          nodePorts += "#{nodePort}/#{protocol} "
-        reply += ">*#{service.metadata.name}*:\n" +
-        ">Internal Ports: #{internalPorts}\n>Node Ports: #{nodePorts}\n>Cluster ip: #{clusterIP}\n"
+          internalPorts.push "#{port}/#{protocol}"
+          nodePorts.push "#{nodePort}/#{protocol}"
+        reply += ">*<https://kubernetes.int.ctek.io/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/service/#{namespace}/#{name}?namespace=#{namespace}|#{name}>*\n"
+        reply += ">ports `#{internalPorts.join(" ")}` and node ports `#{nodePorts.join(" ")}` with cluster ip: `#{clusterIP}`\n\n"
       return reply
     'pods': (response) ->
       reply = ''
       for pod in response.items
-        {metadata: {name}, status: {phase, startTime, containerStatuses}} = pod
-        reply += ">*#{name}*:\n>Status: #{phase}, since: #{moment(startTime).fromNow()} \n"
+        {metadata: {name, namespace}, status: {phase, startTime, containerStatuses}} = pod
+        reply += ">*<https://kubernetes.int.ctek.io/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/pod/#{namespace}/#{name}?namespace=#{namespace}|#{name}>*\n"
+        reply += ">status `#{phase}` since `#{moment(startTime).fromNow()}`\n"
         for cs in containerStatuses
           {name, restartCount, image} = cs
-          reply += ">Container Name: #{name}\n>Restarts: #{restartCount}\n>Image: #{image}\n"
+          reply += ">container `#{name}` with restart count `#{restartCount}` and image `#{image}`\n"
+        reply += "\n"
       return reply
 
 module.exports = Config
