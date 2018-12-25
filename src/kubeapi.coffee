@@ -7,7 +7,7 @@ class KubeApi
       fs = require('fs')
       path = require('path')
       @ca = fs.readFileSync(caFile)
-    @urlPrefix = contextConfig['server'] + '/api/v1/'
+    @urlPrefix = contextConfig['server']
     @token = contextConfig['token']
 
   get: ({path, roles}, callback) ->
